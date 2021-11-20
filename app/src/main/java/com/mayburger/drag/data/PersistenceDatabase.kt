@@ -4,16 +4,16 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import com.mayburger.drag.data.dao.FlyerDao
-import com.mayburger.drag.model.Flyer
+import com.mayburger.drag.data.dao.TaskDao
+import com.mayburger.drag.model.Task
 
 @Database(
-    entities = [Flyer::class],
+    entities = [Task::class],
     version = 1
 )
 abstract class PersistenceDatabase : RoomDatabase() {
 
-    abstract fun flyerDao(): FlyerDao
+    abstract fun taskDao(): TaskDao
 
     companion object {
         @Volatile

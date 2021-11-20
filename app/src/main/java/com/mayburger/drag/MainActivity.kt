@@ -6,10 +6,14 @@ import android.view.DragEvent
 import android.view.LayoutInflater
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.widget.ViewPager2
 import com.mayburger.drag.adapter.TabPagerAdapter
+import com.mayburger.drag.data.PersistenceDatabase
+import com.mayburger.drag.data.Prefs
 import com.mayburger.drag.databinding.ActivityMainBinding
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -24,9 +28,9 @@ class MainActivity : AppCompatActivity() {
         binding.pager.adapter = TabPagerAdapter(
             this,
             arrayListOf(
-                TaskFragment("In Progress", "in_progress"),
-                TaskFragment("Completed", "completed"),
-                TaskFragment("Reviewed", "reviewed")
+                TaskFragment.newInstance("In Progress", "in_progress"),
+                TaskFragment.newInstance("Completed", "completed"),
+                TaskFragment.newInstance("Reviewed", "reviewed")
             )
         )
 
@@ -38,16 +42,16 @@ class MainActivity : AppCompatActivity() {
         binding.pager.setPageTransformer(pageTransformer)
 
         var isCooldown = false
-        val timer = object:CountDownTimer(500,500){
+        val timer = object : CountDownTimer(500, 500) {
             override fun onTick(millisUntilFinished: Long) {
 
             }
+
             override fun onFinish() {
                 isCooldown = false
             }
         }
         binding.endBorder.setOnDragListener { v, event ->
-            println(event.action)
             when (event.action) {
                 DragEvent.ACTION_DRAG_LOCATION -> {
                     if (binding.pager.currentItem != 2 && !isCooldown) {
@@ -70,6 +74,35 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             true
+        }
+        binding.pager.setOnDragListener { v, event ->
+            println(event.action)
+            when (event.action) {
+                DragEvent.ACTION_DRAG_STARTED -> {
+                    binding.trash.show()
+                }
+                DragEvent.ACTION_DRAG_ENDED -> {
+                    binding.trash.hide()
+                }
+            }
+            true
+        }
+
+        binding.trash.setOnDragListener { v, event ->
+            when (event.action) {
+                DragEvent.ACTION_DROP -> {
+                    lifecycleScope.launch {
+                        PersistenceDatabase.getDatabase(this@MainActivity).taskDao().deleteTask(
+                            Prefs.draggingTask)
+                        Prefs.resetDrag()
+                    }
+                }
+            }
+            true
+        }
+
+        binding.add.setOnClickListener {
+            ComposerBSD().show(supportFragmentManager, "")
         }
     }
 

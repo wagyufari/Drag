@@ -6,11 +6,11 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import kotlinx.android.parcel.Parcelize
 
-@Entity(tableName = "flyers")
+@Entity(tableName = "tasks")
 @Parcelize
-data class Flyer(
-    @PrimaryKey
-    val id: String,
+data class Task(
+    @PrimaryKey(autoGenerate = true)
+    val id: Int,
     @ColumnInfo(name = "title")
     var title: String? = null,
     @ColumnInfo(name = "caption")

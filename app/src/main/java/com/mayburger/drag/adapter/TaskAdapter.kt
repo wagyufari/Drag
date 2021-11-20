@@ -2,7 +2,6 @@ package com.mayburger.drag.adapter
 
 import android.content.ClipData
 import android.content.ClipDescription
-import android.view.DragEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,20 +10,18 @@ import androidx.recyclerview.widget.ListAdapter
 import com.mayburger.drag.base.BaseViewHolder
 import com.mayburger.drag.data.Prefs
 import com.mayburger.drag.databinding.ItemTaskBinding
-import com.mayburger.drag.model.Flyer
-import com.mayburger.drag.utils.ViewUtils.hide
-import com.mayburger.drag.utils.ViewUtils.show
+import com.mayburger.drag.model.Task
 
-class TaskAdapter : ListAdapter<Flyer, BaseViewHolder>(TaskDiff) {
+class TaskAdapter : ListAdapter<Task, BaseViewHolder>(TaskDiff) {
 
     private var mListener: Callback? = null
 
-    object TaskDiff : DiffUtil.ItemCallback<Flyer>() {
-        override fun areItemsTheSame(oldItem: Flyer, newItem: Flyer): Boolean {
+    object TaskDiff : DiffUtil.ItemCallback<Task>() {
+        override fun areItemsTheSame(oldItem: Task, newItem: Task): Boolean {
             return oldItem.id == newItem.id
         }
 
-        override fun areContentsTheSame(oldItem: Flyer, newItem: Flyer): Boolean {
+        override fun areContentsTheSame(oldItem: Task, newItem: Task): Boolean {
             return oldItem == newItem
         }
     }
@@ -34,7 +31,7 @@ class TaskAdapter : ListAdapter<Flyer, BaseViewHolder>(TaskDiff) {
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder {
-        return FlyerViewHolder(
+        return TaskViewHolder(
             ItemTaskBinding.inflate(
                 LayoutInflater.from(parent.context),
                 parent,
@@ -48,21 +45,22 @@ class TaskAdapter : ListAdapter<Flyer, BaseViewHolder>(TaskDiff) {
     }
 
     interface Callback {
-        fun onSelectedItem(flyer: Flyer, view: View)
+        fun onSelectedItem(task: Task, view: View)
     }
 
-    inner class FlyerViewHolder(private val mBinding: ItemTaskBinding) :
+    inner class TaskViewHolder(private val mBinding: ItemTaskBinding) :
         BaseViewHolder(mBinding.root) {
 
         override fun onBind(position: Int) {
-            val flyer = getItem(position)
+            val task = getItem(position)
+            mBinding.title.text = task.title
             mBinding.root.setOnLongClickListener {
-                val item = ClipData.Item(flyer.id)
+                val item = ClipData.Item(task.id.toString())
                 val mimeTypes = arrayOf(ClipDescription.MIMETYPE_TEXT_PLAIN)
-                val dragData = ClipData(flyer.id, mimeTypes, item)
+                val dragData = ClipData(task.id.toString(), mimeTypes, item)
                 val myShadow = View.DragShadowBuilder(it)
                 it.startDrag(dragData, myShadow, null, 0)
-                Prefs.draggingFlyer = flyer
+                Prefs.draggingTask = task
                 true
             }
         }

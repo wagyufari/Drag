@@ -1,15 +1,26 @@
 package com.mayburger.drag.data
 
 import com.google.gson.Gson
-import com.mayburger.drag.model.Flyer
+import com.mayburger.drag.model.Task
 import com.pixplicity.easyprefs.library.Prefs
 
 object Prefs {
-    const val PREF_KEY_DRAGGING_FLYER = "pref_key_isya_offset"
+    const val PREF_KEY_DRAGGING_TASK = "pref_key_dragging_task"
 
-    var draggingFlyer: Flyer
-        get() = Gson().fromJson(Prefs.getString(PREF_KEY_DRAGGING_FLYER), Flyer::class.java)
+    var draggingTask: Task
+        get() = Gson().fromJson(Prefs.getString(PREF_KEY_DRAGGING_TASK), Task::class.java)
         set(value) {
-            Prefs.putString(PREF_KEY_DRAGGING_FLYER, Gson().toJson(value))
+            Prefs.putString(PREF_KEY_DRAGGING_TASK, Gson().toJson(value))
         }
+
+    fun resetDrag(){
+        draggingTask = Task(
+            id = 0,
+            title = null,
+            caption = null,
+            image = null,
+            language = null,
+            state = null
+        )
+    }
 }

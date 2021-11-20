@@ -20,7 +20,7 @@ RecyclerModule {
     }
 
     @Provides
-    internal fun provideFlyerAdapter(): TaskAdapter {
+    internal fun provideTaskAdapter(): TaskAdapter {
         return TaskAdapter()
     }
 

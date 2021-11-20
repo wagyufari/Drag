@@ -9,7 +9,10 @@ import android.content.res.Resources
 import android.os.Handler
 import android.provider.Settings
 import android.view.View
+import android.view.inputmethod.EditorInfo
+import android.widget.EditText
 import androidx.core.animation.addListener
+import androidx.databinding.BindingAdapter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.launch
@@ -317,6 +320,20 @@ object ViewUtils {
             start()
         }
     }
+
+    @BindingAdapter("actionDone")
+    @JvmStatic
+    fun bindActionDone(editText: EditText, runnable: View.OnClickListener?) {
+        editText.setOnEditorActionListener { v, actionId, _ ->
+            if (editText.text.toString().isEmpty().not()) {
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    runnable?.onClick(v)
+                }
+            }
+            false
+        }
+    }
+
 }
 
 
