@@ -12,7 +12,7 @@
         android:clipToPadding="false"
         android:focusable="true"
         android:padding="2dp"
-        app:cardBackgroundColor="@color/neutral_600"
+        app:cardBackgroundColor="@color/neutral_200"
         app:cardCornerRadius="8dp"
         app:cardElevation="0dp"
         tools:visibility="visible">

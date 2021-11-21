@@ -91,38 +91,43 @@ class TaskFragment : Fragment() {
         binding.recycler.setOnDragListener { v, event ->
             when (event.action) {
                 DragEvent.ACTION_DROP -> {
-                    CoroutineScope(IO).launch {
-                        database.taskDao().updateTask(Prefs.draggingTask.apply {
-                            state = this@TaskFragment.state
-                            order = if (taskAdapter.data.isEmpty()) 0 else taskAdapter.data.maxOf { it.order ?: 0 } + 1
-                        })
-                        val newData = ArrayList<Task>()
-                        for ((index, task) in taskAdapter.data.withIndex()) {
-                            if (task.id == -1) {
-                                val newTask = Prefs.draggingTask
-                                newTask.state = this@TaskFragment.state
-                                newTask.order = index
-                                newData.add(newTask)
-                            } else {
-                                val newTask = task
-                                newTask.order = index
-                                newData.add(newTask)
+//                    val newData = ArrayList<Task>()
+//                    for ((index, task) in taskAdapter.data.withIndex()) {
+//                        if (task.id == -1) {
+//                            val newTask = Prefs.draggingTask
+//                            newTask.state = this@TaskFragment.state
+//                            newTask.order = index
+//                            newData.add(newTask)
+//                        } else {
+//                            val newTask = task
+//                            newTask.order = index
+//                            newData.add(newTask)
+//                        }
+//                    }
+                    val newData = taskAdapter.data.mapIndexed { index, task ->
+                        if (task.id == -1){
+                            Prefs.draggingTask.apply {
+                                state = this@TaskFragment.state
+                                order = index
+                            }
+                        } else{
+                            task.apply {
+                                order = index
                             }
                         }
-                        database.taskDao().updateTasks(newData)
+                    }
+                    CoroutineScope(IO).launch {
+//                        database.taskDao().updateTask(Prefs.draggingTask.apply {
+//                            state = this@TaskFragment.state
+//                            order = if (taskAdapter.data.isEmpty()) 0 else taskAdapter.data.maxOf { it.order ?: 0 } + 1
+//                        })
+                        database.taskDao().updateTasks(newData.toCollection(arrayListOf()))
                     }
                     binding.recycler.setBackgroundColor(0)
                 }
                 DragEvent.ACTION_DRAG_ENTERED -> {
-                    binding.recycler.setBackgroundColor(
-                        resources.getColor(
-                            R.color.neutral_300,
-                            null
-                        )
-                    )
                 }
                 DragEvent.ACTION_DRAG_EXITED -> {
-                    binding.recycler.setBackgroundColor(0)
                 }
                 DragEvent.ACTION_DRAG_ENDED -> {
                     taskAdapter.setItems(tasks)
