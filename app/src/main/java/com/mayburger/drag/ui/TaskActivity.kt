@@ -5,7 +5,6 @@ import android.os.CountDownTimer
 import android.view.DragEvent
 import android.view.LayoutInflater
 import android.view.View
-import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
@@ -17,10 +16,9 @@ import com.mayburger.drag.data.Prefs
 import com.mayburger.drag.databinding.ActivityTaskBinding
 import com.mayburger.drag.dpToPx
 import com.mayburger.drag.model.State
+import com.mayburger.drag.ui.bsd.TaskComposerBSD
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers.IO
-import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -75,10 +73,12 @@ class TaskActivity : AppCompatActivity() {
         binding.endBorder.setOnDragListener { v, event ->
             when (event.action) {
                 DragEvent.ACTION_DRAG_LOCATION -> {
-                    if (binding.pager.currentItem != 2 && !isCooldown) {
-                        binding.pager.currentItem = binding.pager.currentItem + 1
-                        isCooldown = true
-                        timer.start()
+                    lifecycleScope.launch {
+                        if (!isCooldown) {
+                            binding.pager.currentItem = binding.pager.currentItem + 1
+                            isCooldown = true
+                            timer.start()
+                        }
                     }
                 }
             }

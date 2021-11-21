@@ -1,4 +1,4 @@
-package com.mayburger.drag.ui
+package com.mayburger.drag.ui.bsd
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -10,7 +10,6 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.mayburger.drag.data.PersistenceDatabase
 import com.mayburger.drag.databinding.StateComposerBsdBinding
 import com.mayburger.drag.model.State
-import com.mayburger.drag.model.Task
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO

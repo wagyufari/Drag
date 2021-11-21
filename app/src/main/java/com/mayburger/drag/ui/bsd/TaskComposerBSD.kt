@@ -1,4 +1,4 @@
-package com.mayburger.drag.ui
+package com.mayburger.drag.ui.bsd
 
 import android.os.Bundle
 import android.view.LayoutInflater
