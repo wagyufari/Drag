@@ -6,7 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.inputmethod.EditorInfo
-import androidx.lifecycle.lifecycleScope
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.mayburger.drag.data.PersistenceDatabase
 import com.mayburger.drag.databinding.ComposerBsdBinding
@@ -40,7 +39,7 @@ class ComposerBSD: BottomSheetDialogFragment() {
                     CoroutineScope(IO).launch {
                         val tasks = database.getTasksSuspended("bahasa", "in_progress")
                         val nextOrder = if (tasks.isEmpty()){0}else{tasks.maxOf { it.order?:0 }}
-                        PersistenceDatabase.getDatabase(requireActivity()).taskDao().putTasks(
+                        PersistenceDatabase.getDatabase(requireActivity()).taskDao().putTasksSuspended(
                             Task(
                                 id = 0,
                                 title = binding.input.text.toString(),

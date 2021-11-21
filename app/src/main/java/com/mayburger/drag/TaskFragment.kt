@@ -15,12 +15,10 @@ import kotlinx.android.synthetic.main.fragment_task.*
 import javax.inject.Inject
 
 import android.view.DragEvent
-import androidx.lifecycle.lifecycleScope
 import com.mayburger.drag.data.Prefs
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.launch
-import java.util.stream.Collectors.toCollection
 
 
 @AndroidEntryPoint
@@ -88,22 +86,9 @@ class TaskFragment : Fragment() {
             }
         })
 
-        binding.recycler.setOnDragListener { v, event ->
+        binding.root.setOnDragListener { v, event ->
             when (event.action) {
                 DragEvent.ACTION_DROP -> {
-//                    val newData = ArrayList<Task>()
-//                    for ((index, task) in taskAdapter.data.withIndex()) {
-//                        if (task.id == -1) {
-//                            val newTask = Prefs.draggingTask
-//                            newTask.state = this@TaskFragment.state
-//                            newTask.order = index
-//                            newData.add(newTask)
-//                        } else {
-//                            val newTask = task
-//                            newTask.order = index
-//                            newData.add(newTask)
-//                        }
-//                    }
                     val newData = taskAdapter.data.mapIndexed { index, task ->
                         if (task.id == -1){
                             Prefs.draggingTask.apply {
@@ -117,11 +102,11 @@ class TaskFragment : Fragment() {
                         }
                     }
                     CoroutineScope(IO).launch {
-//                        database.taskDao().updateTask(Prefs.draggingTask.apply {
-//                            state = this@TaskFragment.state
-//                            order = if (taskAdapter.data.isEmpty()) 0 else taskAdapter.data.maxOf { it.order ?: 0 } + 1
-//                        })
-                        database.taskDao().updateTasks(newData.toCollection(arrayListOf()))
+                        database.taskDao().updateTask(Prefs.draggingTask.apply {
+                            state = this@TaskFragment.state
+                            order = if (taskAdapter.data.isEmpty()) 0 else taskAdapter.data.maxOf { it.order?:0 } + 1
+                        })
+                        database.taskDao().updateTask(newData.toCollection(arrayListOf()))
                     }
                     binding.recycler.setBackgroundColor(0)
                 }
