@@ -1,38 +1,50 @@
-package com.mayburger.drag
+package com.mayburger.drag.ui
 
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.view.DragEvent
 import android.view.LayoutInflater
 import android.view.View
+import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.widget.ViewPager2
 import com.mayburger.drag.adapter.TabPagerAdapter
 import com.mayburger.drag.data.PersistenceDatabase
 import com.mayburger.drag.data.Prefs
-import com.mayburger.drag.databinding.ActivityMainBinding
+import com.mayburger.drag.databinding.ActivityTaskBinding
+import com.mayburger.drag.dpToPx
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity() {
+class TaskActivity : AppCompatActivity() {
 
-    lateinit var binding: ActivityMainBinding
+    lateinit var binding: ActivityTaskBinding
+
+    val viewModel: TaskViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityMainBinding.inflate(LayoutInflater.from(this))
+        binding = ActivityTaskBinding.inflate(LayoutInflater.from(this))
         setContentView(binding.root)
 
-        binding.pager.adapter = TabPagerAdapter(
-            this,
-            arrayListOf(
-                TaskFragment.newInstance("In Progress", "in_progress"),
-                TaskFragment.newInstance("Completed", "completed"),
-                TaskFragment.newInstance("Reviewed", "reviewed")
+        viewModel.states.observe(this) {
+            val fragments = ArrayList<Fragment>().apply {
+                it.forEach {
+                    add(TaskFragment.newInstance(title = it.title, state = it.stateId))
+                }
+                add(TaskFragment.newInstance("New list", Integer.MIN_VALUE.toString()))
+            }
+            binding.pager.adapter = TabPagerAdapter(
+                this,
+                fragments
             )
-        )
+        }
 
         val pageTranslationX = dpToPx(64)
         val pageTransformer = ViewPager2.PageTransformer { page: View, position: Float ->
@@ -92,8 +104,9 @@ class MainActivity : AppCompatActivity() {
             when (event.action) {
                 DragEvent.ACTION_DROP -> {
                     lifecycleScope.launch {
-                        PersistenceDatabase.getDatabase(this@MainActivity).taskDao().deleteTask(
-                            Prefs.draggingTask)
+                        PersistenceDatabase.getDatabase(this@TaskActivity).taskDao().deleteTask(
+                            Prefs.draggingTask
+                        )
                         Prefs.resetDrag()
                     }
                 }
@@ -102,7 +115,17 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.add.setOnClickListener {
-            ComposerBSD().show(supportFragmentManager, "")
+            CoroutineScope(IO).launch {
+                if (PersistenceDatabase.getDatabase(this@TaskActivity).stateDao().getStatesSuspended().isEmpty()) {
+                    Toast.makeText(
+                        this@TaskActivity,
+                        "Create a new list first!",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                } else {
+                    TaskComposerBSD().show(supportFragmentManager, "")
+                }
+            }
         }
     }
 

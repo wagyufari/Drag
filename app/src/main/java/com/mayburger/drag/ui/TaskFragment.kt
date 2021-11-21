@@ -1,5 +1,6 @@
-package com.mayburger.drag
+package com.mayburger.drag.ui
 
+import android.icu.number.IntegerWidth
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -15,7 +16,12 @@ import kotlinx.android.synthetic.main.fragment_task.*
 import javax.inject.Inject
 
 import android.view.DragEvent
+import android.widget.TextView
+import com.mayburger.drag.R
 import com.mayburger.drag.data.Prefs
+import com.mayburger.drag.utils.ViewUtils.dpToPx
+import com.mayburger.drag.utils.ViewUtils.hide
+import com.mayburger.drag.utils.ViewUtils.show
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.launch
@@ -84,36 +90,50 @@ class TaskFragment : Fragment() {
             override fun onDragEntered(position: Int) {
                 taskAdapter.setItems(tasks, position)
             }
+
             override fun onDropped() {
                 onDrop()
             }
         })
 
         binding.root.setOnDragListener { v, event ->
-            println(event.action)
-            when (event.action) {
-                DragEvent.ACTION_DROP -> {
-                    onDrop()
-                }
-                DragEvent.ACTION_DRAG_ENTERED -> {
-                    if (taskAdapter.data.isEmpty()) {
-                        taskAdapter.setItems(tasks, 0)
-                    } else if ( taskAdapter.data.filter { it.id == -1 }.isEmpty()){
-                        taskAdapter.setItemsLast(tasks)
+            if (state != Int.MIN_VALUE.toString()) {
+                when (event.action) {
+                    DragEvent.ACTION_DROP -> {
+                        onDrop()
                     }
-                }
-                DragEvent.ACTION_DRAG_EXITED -> {
-                    taskAdapter.setItems(tasks)
-                }
-                DragEvent.ACTION_DRAG_ENDED -> {
-                    taskAdapter.setItems(tasks)
+                    DragEvent.ACTION_DRAG_ENTERED -> {
+                        if (taskAdapter.data.isEmpty()) {
+                            taskAdapter.setItems(tasks, 0)
+                        } else if (taskAdapter.data.filter { it.id == -1 }.isEmpty()) {
+                            taskAdapter.setItemsLast(tasks)
+                        }
+                    }
+                    DragEvent.ACTION_DRAG_EXITED -> {
+                        taskAdapter.setItems(tasks)
+                    }
+                    DragEvent.ACTION_DRAG_ENDED -> {
+                        taskAdapter.setItems(tasks)
+                    }
                 }
             }
             true
         }
+        initializeNewList()
     }
 
-    fun onDrop(){
+    fun initializeNewList() {
+        if (state == Integer.MIN_VALUE.toString()) {
+            binding.title.setTextColor(resources.getColor(R.color.purple_500, null))
+            binding.title.textAlignment = TextView.TEXT_ALIGNMENT_CENTER
+            binding.title.setPadding(0, dpToPx(16), 0, 0)
+            binding.recyclerCard.setOnClickListener {
+                StateComposerBSD().show(childFragmentManager, "")
+            }
+        }
+    }
+
+    fun onDrop() {
         val newData = taskAdapter.data.mapIndexed { index, task ->
             if (task.id == -1) {
                 Prefs.draggingTask.apply {
