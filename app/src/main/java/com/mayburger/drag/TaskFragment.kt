@@ -91,28 +91,24 @@ class TaskFragment : Fragment() {
         binding.recycler.setOnDragListener { v, event ->
             when (event.action) {
                 DragEvent.ACTION_DROP -> {
-                    CoroutineScope(IO).launch {
-                        CoroutineScope(IO).launch {
-                            database.taskDao().updateTask(Prefs.draggingTask.apply {
+                    val newData = ArrayList<Task>()
+                    for ((index, task) in taskAdapter.data.withIndex()) {
+                        if (task.id == -1) {
+                            newData.add(Prefs.draggingTask.apply {
                                 state = this@TaskFragment.state
+                                order = index
+                            })
+                        } else {
+                            newData.add(task.apply {
+                                order = index
                             })
                         }
-                        taskAdapter.data.forEachIndexed { index, task ->
-                            if (task.id == -1) {
-                                CoroutineScope(IO).launch {
-                                    database.taskDao().updateTask(Prefs.draggingTask.apply {
-                                        state = this@TaskFragment.state
-                                        order = index
-                                    })
-                                }
-                            } else {
-                                CoroutineScope(IO).launch {
-                                    database.taskDao().updateTask(task.apply {
-                                        order = index
-                                    })
-                                }
-                            }
-                        }
+                    }
+                    CoroutineScope(IO).launch {
+                        database.taskDao().updateTask(Prefs.draggingTask.apply {
+                            state = this@TaskFragment.state
+                        })
+                        database.taskDao().updateTasks(newData)
                     }
                     binding.recycler.setBackgroundColor(0)
                 }
