@@ -94,14 +94,14 @@ class TaskFragment : Fragment() {
                     val newData = ArrayList<Task>()
                     for ((index, task) in taskAdapter.data.withIndex()) {
                         if (task.id == -1) {
-                            newData.add(Prefs.draggingTask.apply {
-                                state = this@TaskFragment.state
-                                order = index
-                            })
+                            val newTask = Prefs.draggingTask
+                            newTask.state = this@TaskFragment.state
+                            newTask.order = index
+                            newData.add(newTask)
                         } else {
-                            newData.add(task.apply {
-                                order = index
-                            })
+                            val newTask = task
+                            newTask.order = index
+                            newData.add(newTask)
                         }
                     }
                     CoroutineScope(IO).launch {
