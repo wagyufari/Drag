@@ -91,23 +91,24 @@ class TaskFragment : Fragment() {
         binding.recycler.setOnDragListener { v, event ->
             when (event.action) {
                 DragEvent.ACTION_DROP -> {
-                    val newData = ArrayList<Task>()
-                    for ((index, task) in taskAdapter.data.withIndex()) {
-                        if (task.id == -1) {
-                            val newTask = Prefs.draggingTask
-                            newTask.state = this@TaskFragment.state
-                            newTask.order = index
-                            newData.add(newTask)
-                        } else {
-                            val newTask = task
-                            newTask.order = index
-                            newData.add(newTask)
-                        }
-                    }
                     CoroutineScope(IO).launch {
                         database.taskDao().updateTask(Prefs.draggingTask.apply {
                             state = this@TaskFragment.state
+                            order = if (taskAdapter.data.isEmpty()) 0 else taskAdapter.data.maxOf { it.order ?: 0 } + 1
                         })
+                        val newData = ArrayList<Task>()
+                        for ((index, task) in taskAdapter.data.withIndex()) {
+                            if (task.id == -1) {
+                                val newTask = Prefs.draggingTask
+                                newTask.state = this@TaskFragment.state
+                                newTask.order = index
+                                newData.add(newTask)
+                            } else {
+                                val newTask = task
+                                newTask.order = index
+                                newData.add(newTask)
+                            }
+                        }
                         database.taskDao().updateTasks(newData)
                     }
                     binding.recycler.setBackgroundColor(0)
