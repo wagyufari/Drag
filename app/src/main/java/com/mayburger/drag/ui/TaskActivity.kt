@@ -54,10 +54,11 @@ class TaskActivity : AppCompatActivity() {
             pagerAdapter = TabPagerAdapter(this, fragments)
             binding.pager.adapter = pagerAdapter
 
+            // To initalize all TaskFragments to make the DragListener work properly
             binding.pager.setCurrentItem(fragments.size, false)
             Handler().postDelayed({
                 binding.pager.setCurrentItem(0, true)
-            },500)
+            },100)
         }
 
         val pageTranslationX = dpToPx(64)
