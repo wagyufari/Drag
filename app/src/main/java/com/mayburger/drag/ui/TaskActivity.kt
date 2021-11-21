@@ -31,6 +31,8 @@ class TaskActivity : AppCompatActivity() {
     @Inject
     lateinit var database:PersistenceDatabase
 
+    lateinit var pagerAdapter:TabPagerAdapter
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityTaskBinding.inflate(LayoutInflater.from(this))
@@ -48,10 +50,8 @@ class TaskActivity : AppCompatActivity() {
                 }
                 add(TaskFragment.newInstance("New list", Integer.MIN_VALUE.toString()))
             }
-            binding.pager.adapter = TabPagerAdapter(
-                this,
-                fragments
-            )
+            pagerAdapter = TabPagerAdapter(this, fragments)
+            binding.pager.adapter = pagerAdapter
         }
 
         val pageTranslationX = dpToPx(64)
@@ -70,6 +70,7 @@ class TaskActivity : AppCompatActivity() {
                 isCooldown = false
             }
         }
+
         binding.endBorder.setOnDragListener { v, event ->
             when (event.action) {
                 DragEvent.ACTION_DRAG_LOCATION -> {
@@ -96,8 +97,8 @@ class TaskActivity : AppCompatActivity() {
             }
             true
         }
-        binding.pager.setOnDragListener { v, event ->
-            println(event.action)
+        binding.root.setOnDragListener { v, event ->
+            (pagerAdapter.fragments[binding.pager.currentItem] as TaskFragment).configureDragListener(event)
             when (event.action) {
                 DragEvent.ACTION_DRAG_STARTED -> {
                     binding.trash.show()

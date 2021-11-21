@@ -19,6 +19,7 @@ import android.view.DragEvent
 import android.widget.TextView
 import com.mayburger.drag.R
 import com.mayburger.drag.data.Prefs
+import com.mayburger.drag.ui.bsd.StateComposerBSD
 import com.mayburger.drag.utils.ViewUtils.dpToPx
 import com.mayburger.drag.utils.ViewUtils.hide
 import com.mayburger.drag.utils.ViewUtils.show
@@ -96,29 +97,6 @@ class TaskFragment : Fragment() {
             }
         })
 
-        binding.root.setOnDragListener { v, event ->
-            if (state != Int.MIN_VALUE.toString()) {
-                when (event.action) {
-                    DragEvent.ACTION_DROP -> {
-                        onDrop()
-                    }
-                    DragEvent.ACTION_DRAG_ENTERED -> {
-                        if (taskAdapter.data.isEmpty()) {
-                            taskAdapter.setItems(tasks, 0)
-                        } else if (taskAdapter.data.filter { it.id == -1 }.isEmpty()) {
-                            taskAdapter.setItemsLast(tasks)
-                        }
-                    }
-                    DragEvent.ACTION_DRAG_EXITED -> {
-                        taskAdapter.setItems(tasks)
-                    }
-                    DragEvent.ACTION_DRAG_ENDED -> {
-                        taskAdapter.setItems(tasks)
-                    }
-                }
-            }
-            true
-        }
         initializeNewList()
     }
 
@@ -154,6 +132,27 @@ class TaskFragment : Fragment() {
                 } + 1
             })
             database.taskDao().updateTask(newData.toCollection(arrayListOf()))
+        }
+    }
+}
+
+fun TaskFragment.configureDragListener(event:DragEvent){
+    if (state != Int.MIN_VALUE.toString()){
+        when (event.action) {
+            DragEvent.ACTION_DROP -> {
+                onDrop()
+            }
+            DragEvent.ACTION_DRAG_ENTERED -> {
+                if (taskAdapter.data.isEmpty() || taskAdapter.data.filter { it.id == -1 }.isEmpty()) {
+                    taskAdapter.setItemsLast(tasks)
+                }
+            }
+            DragEvent.ACTION_DRAG_EXITED -> {
+                taskAdapter.setItems(tasks)
+            }
+            DragEvent.ACTION_DRAG_ENDED -> {
+                taskAdapter.setItems(tasks)
+            }
         }
     }
 }
