@@ -2,6 +2,7 @@ package com.mayburger.drag.ui
 
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.os.Handler
 import android.view.DragEvent
 import android.view.LayoutInflater
 import android.view.View
@@ -52,6 +53,11 @@ class TaskActivity : AppCompatActivity() {
             }
             pagerAdapter = TabPagerAdapter(this, fragments)
             binding.pager.adapter = pagerAdapter
+
+            binding.pager.setCurrentItem(fragments.size, false)
+            Handler().postDelayed({
+                binding.pager.setCurrentItem(0, true)
+            },500)
         }
 
         val pageTranslationX = dpToPx(64)
@@ -98,7 +104,6 @@ class TaskActivity : AppCompatActivity() {
             true
         }
         binding.root.setOnDragListener { v, event ->
-            (pagerAdapter.fragments[binding.pager.currentItem] as TaskFragment).configureDragListener(event)
             when (event.action) {
                 DragEvent.ACTION_DRAG_STARTED -> {
                     binding.trash.show()
