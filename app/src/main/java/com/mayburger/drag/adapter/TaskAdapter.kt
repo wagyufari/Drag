@@ -6,8 +6,6 @@ import android.view.DragEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.mayburger.drag.base.BaseViewHolder
 import com.mayburger.drag.data.Prefs
@@ -119,6 +117,7 @@ class TaskAdapter : RecyclerView.Adapter<BaseViewHolder>() {
     interface Callback {
         fun onSelectedItem(task: Task, view: View)
         fun onDragEntered(position: Int)
+        fun onDropped()
     }
 
     inner class TaskViewHolder(private val mBinding: ItemTaskBinding) :
@@ -137,8 +136,13 @@ class TaskAdapter : RecyclerView.Adapter<BaseViewHolder>() {
                 true
             }
             mBinding.root.setOnDragListener { v, event ->
-                if (event.action == DragEvent.ACTION_DRAG_ENTERED) {
-                    mListener?.onDragEntered(position)
+                when(event.action){
+                    DragEvent.ACTION_DRAG_ENTERED->{
+                        mListener?.onDragEntered(position)
+                    }
+                    DragEvent.ACTION_DROP->{
+                        mListener?.onDropped()
+                    }
                 }
                 true
             }
@@ -150,7 +154,7 @@ class TaskAdapter : RecyclerView.Adapter<BaseViewHolder>() {
         BaseViewHolder(mBinding.root) {
 
         override fun onBind(position: Int) {
-
+            mBinding.title.text = Prefs.draggingTask.title
         }
     }
 

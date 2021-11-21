@@ -84,33 +84,16 @@ class TaskFragment : Fragment() {
             override fun onDragEntered(position: Int) {
                 taskAdapter.setItems(tasks, position)
             }
+            override fun onDropped() {
+                onDrop()
+            }
         })
 
         binding.root.setOnDragListener { v, event ->
+            println(event.action)
             when (event.action) {
                 DragEvent.ACTION_DROP -> {
-                    val newData = taskAdapter.data.mapIndexed { index, task ->
-                        if (task.id == -1) {
-                            Prefs.draggingTask.apply {
-                                state = this@TaskFragment.state
-                                order = index
-                            }
-                        } else {
-                            task.apply {
-                                order = index
-                            }
-                        }
-                    }
-                    CoroutineScope(IO).launch {
-                        database.taskDao().updateTask(Prefs.draggingTask.apply {
-                            state = this@TaskFragment.state
-                            order = if (taskAdapter.data.isEmpty()) 0 else taskAdapter.data.maxOf {
-                                it.order ?: 0
-                            } + 1
-                        })
-                        database.taskDao().updateTask(newData.toCollection(arrayListOf()))
-                    }
-                    binding.recycler.setBackgroundColor(0)
+                    onDrop()
                 }
                 DragEvent.ACTION_DRAG_ENTERED -> {
                     if (taskAdapter.data.isEmpty()) {
@@ -128,6 +111,29 @@ class TaskFragment : Fragment() {
             }
             true
         }
+    }
 
+    fun onDrop(){
+        val newData = taskAdapter.data.mapIndexed { index, task ->
+            if (task.id == -1) {
+                Prefs.draggingTask.apply {
+                    state = this@TaskFragment.state
+                    order = index
+                }
+            } else {
+                task.apply {
+                    order = index
+                }
+            }
+        }
+        CoroutineScope(IO).launch {
+            database.taskDao().updateTask(Prefs.draggingTask.apply {
+                state = this@TaskFragment.state
+                order = if (taskAdapter.data.isEmpty()) 0 else taskAdapter.data.maxOf {
+                    it.order ?: 0
+                } + 1
+            })
+            database.taskDao().updateTask(newData.toCollection(arrayListOf()))
+        }
     }
 }
