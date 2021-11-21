@@ -16,10 +16,13 @@ import com.mayburger.drag.data.PersistenceDatabase
 import com.mayburger.drag.data.Prefs
 import com.mayburger.drag.databinding.ActivityTaskBinding
 import com.mayburger.drag.dpToPx
+import com.mayburger.drag.model.State
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class TaskActivity : AppCompatActivity() {
@@ -27,6 +30,8 @@ class TaskActivity : AppCompatActivity() {
     lateinit var binding: ActivityTaskBinding
 
     val viewModel: TaskViewModel by viewModels()
+    @Inject
+    lateinit var database:PersistenceDatabase
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,6 +39,11 @@ class TaskActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         viewModel.states.observe(this) {
+            lifecycleScope.launch {
+                if (it.isEmpty()){
+                    database.stateDao().putState(State(id = 0, title = "To Do", order = 0, stateId = "to_do"))
+                }
+            }
             val fragments = ArrayList<Fragment>().apply {
                 it.forEach {
                     add(TaskFragment.newInstance(title = it.title, state = it.stateId))
@@ -58,7 +68,6 @@ class TaskActivity : AppCompatActivity() {
             override fun onTick(millisUntilFinished: Long) {
 
             }
-
             override fun onFinish() {
                 isCooldown = false
             }
@@ -104,7 +113,7 @@ class TaskActivity : AppCompatActivity() {
             when (event.action) {
                 DragEvent.ACTION_DROP -> {
                     lifecycleScope.launch {
-                        PersistenceDatabase.getDatabase(this@TaskActivity).taskDao().deleteTask(
+                        database.taskDao().deleteTask(
                             Prefs.draggingTask
                         )
                         Prefs.resetDrag()
@@ -115,17 +124,7 @@ class TaskActivity : AppCompatActivity() {
         }
 
         binding.add.setOnClickListener {
-            CoroutineScope(IO).launch {
-                if (PersistenceDatabase.getDatabase(this@TaskActivity).stateDao().getStatesSuspended().isEmpty()) {
-                    Toast.makeText(
-                        this@TaskActivity,
-                        "Create a new list first!",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                } else {
-                    TaskComposerBSD().show(supportFragmentManager, "")
-                }
-            }
+            TaskComposerBSD().show(supportFragmentManager, "")
         }
     }
 

@@ -14,7 +14,7 @@ interface StateDao {
     suspend fun getStatesSuspended():List<State>
 
     @Insert
-    fun putState(state:State)
+    suspend fun putState(state:State)
 
     @Delete
     suspend fun deleteTask(task:Task)
