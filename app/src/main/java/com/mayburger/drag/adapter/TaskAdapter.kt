@@ -57,6 +57,23 @@ class TaskAdapter : RecyclerView.Adapter<BaseViewHolder>() {
         notifyDataSetChanged()
     }
 
+    fun setItemsLast(data: ArrayList<Task>) {
+        this.data.clear()
+        this.data.addAll(data.filter {
+            it.id != Prefs.draggingTask.id
+        })
+        this.data.add(Task(
+            id = -1,
+            title = null,
+            caption = null,
+            image = null,
+            language = null,
+            state = null
+        ))
+        notifyDataSetChanged()
+    }
+
+
     override fun getItemViewType(position: Int): Int {
         return when {
             data.isEmpty() -> {

@@ -90,12 +90,12 @@ class TaskFragment : Fragment() {
             when (event.action) {
                 DragEvent.ACTION_DROP -> {
                     val newData = taskAdapter.data.mapIndexed { index, task ->
-                        if (task.id == -1){
+                        if (task.id == -1) {
                             Prefs.draggingTask.apply {
                                 state = this@TaskFragment.state
                                 order = index
                             }
-                        } else{
+                        } else {
                             task.apply {
                                 order = index
                             }
@@ -104,15 +104,23 @@ class TaskFragment : Fragment() {
                     CoroutineScope(IO).launch {
                         database.taskDao().updateTask(Prefs.draggingTask.apply {
                             state = this@TaskFragment.state
-                            order = if (taskAdapter.data.isEmpty()) 0 else taskAdapter.data.maxOf { it.order?:0 } + 1
+                            order = if (taskAdapter.data.isEmpty()) 0 else taskAdapter.data.maxOf {
+                                it.order ?: 0
+                            } + 1
                         })
                         database.taskDao().updateTask(newData.toCollection(arrayListOf()))
                     }
                     binding.recycler.setBackgroundColor(0)
                 }
                 DragEvent.ACTION_DRAG_ENTERED -> {
+                    if (taskAdapter.data.isEmpty()) {
+                        taskAdapter.setItems(tasks, 0)
+                    } else if ( taskAdapter.data.filter { it.id == -1 }.isEmpty()){
+                        taskAdapter.setItemsLast(tasks)
+                    }
                 }
                 DragEvent.ACTION_DRAG_EXITED -> {
+                    taskAdapter.setItems(tasks)
                 }
                 DragEvent.ACTION_DRAG_ENDED -> {
                     taskAdapter.setItems(tasks)
