@@ -20,5 +20,7 @@ data class Task(
     @ColumnInfo(name = "language")
     var language: String? = "bahasa",
     @ColumnInfo(name = "state")
-    var state: String? = "in_progress"
+    var state: String? = "in_progress",
+    @ColumnInfo(name= "order")
+    var order:Int?=0
 ) : Parcelable

@@ -17,21 +17,27 @@ import javax.inject.Inject
 import android.view.DragEvent
 import androidx.lifecycle.lifecycleScope
 import com.mayburger.drag.data.Prefs
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.launch
+import java.util.stream.Collectors.toCollection
 
 
 @AndroidEntryPoint
 class TaskFragment : Fragment() {
 
     lateinit var binding: FragmentTaskBinding
+
     @Inject
     lateinit var database: PersistenceDatabase
+
     @Inject
     lateinit var taskAdapter: TaskAdapter
 
-    companion object{
+    companion object {
         const val ARG_TITLE = "arg_title"
         const val ARG_STATE = "arg_state"
-        fun newInstance(title:String, state:String):Fragment{
+        fun newInstance(title: String, state: String): Fragment {
             return TaskFragment().apply {
                 arguments = Bundle().apply {
                     putString(ARG_TITLE, title)
@@ -41,8 +47,8 @@ class TaskFragment : Fragment() {
         }
     }
 
-    lateinit var title:String
-    lateinit var state:String
+    lateinit var title: String
+    lateinit var state: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,37 +66,73 @@ class TaskFragment : Fragment() {
         return binding.root
     }
 
+    val tasks = ArrayList<Task>()
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.title.text = title
-        binding.recycler.apply{
+        binding.recycler.apply {
             adapter = taskAdapter
             layoutManager = LinearLayoutManager(requireActivity())
         }
-        database.taskDao().getTasks("bahasa", state).observe(viewLifecycleOwner){
-            taskAdapter.submitList(it)
+        database.taskDao().getTasks("bahasa", state).observe(viewLifecycleOwner) {
+            tasks.clear()
+            tasks.addAll(it)
+            taskAdapter.setItems(tasks)
         }
-        taskAdapter.setListener(object:TaskAdapter.Callback{
+        taskAdapter.setListener(object : TaskAdapter.Callback {
             override fun onSelectedItem(task: Task, v: View) {
+            }
+
+            override fun onDragEntered(position: Int) {
+                taskAdapter.setItems(tasks, position)
             }
         })
 
-        binding.dropArea.setOnDragListener { v, event ->
+        binding.recycler.setOnDragListener { v, event ->
             when (event.action) {
                 DragEvent.ACTION_DROP -> {
-                    lifecycleScope.launchWhenCreated {
-                        database.taskDao().updateTask(Prefs.draggingTask.apply { state = this@TaskFragment.state })
+                    CoroutineScope(IO).launch {
+                        CoroutineScope(IO).launch {
+                            database.taskDao().updateTask(Prefs.draggingTask.apply {
+                                state = this@TaskFragment.state
+                            })
+                        }
+                        taskAdapter.data.forEachIndexed { index, task ->
+                            if (task.id == -1) {
+                                CoroutineScope(IO).launch {
+                                    database.taskDao().updateTask(Prefs.draggingTask.apply {
+                                        state = this@TaskFragment.state
+                                        order = index
+                                    })
+                                }
+                            } else {
+                                CoroutineScope(IO).launch {
+                                    database.taskDao().updateTask(task.apply {
+                                        order = index
+                                    })
+                                }
+                            }
+                        }
                     }
                     binding.recycler.setBackgroundColor(0)
                 }
-                DragEvent.ACTION_DRAG_ENTERED->{
-                    binding.recycler.setBackgroundColor(resources.getColor(R.color.neutral_300,null))
+                DragEvent.ACTION_DRAG_ENTERED -> {
+                    binding.recycler.setBackgroundColor(
+                        resources.getColor(
+                            R.color.neutral_300,
+                            null
+                        )
+                    )
                 }
-                DragEvent.ACTION_DRAG_EXITED->{
+                DragEvent.ACTION_DRAG_EXITED -> {
                     binding.recycler.setBackgroundColor(0)
+                }
+                DragEvent.ACTION_DRAG_ENDED -> {
+                    taskAdapter.setItems(tasks)
                 }
             }
             true
         }
+
     }
 }

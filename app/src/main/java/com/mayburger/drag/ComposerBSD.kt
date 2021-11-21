@@ -12,6 +12,8 @@ import com.mayburger.drag.data.PersistenceDatabase
 import com.mayburger.drag.databinding.ComposerBsdBinding
 import com.mayburger.drag.model.Task
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.launch
 
 
@@ -34,7 +36,10 @@ class ComposerBSD: BottomSheetDialogFragment() {
         binding.input.setOnEditorActionListener { v, actionId, _ ->
             if (binding.input.text.toString().isEmpty().not()) {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
-                    lifecycleScope.launch {
+                    val database = PersistenceDatabase.getDatabase(requireActivity()).taskDao()
+                    CoroutineScope(IO).launch {
+                        val tasks = database.getTasksSuspended("bahasa", "in_progress")
+                        val nextOrder = if (tasks.isEmpty()){0}else{tasks.maxOf { it.order?:0 }}
                         PersistenceDatabase.getDatabase(requireActivity()).taskDao().putTasks(
                             Task(
                                 id = 0,
@@ -42,7 +47,8 @@ class ComposerBSD: BottomSheetDialogFragment() {
                                 caption = null,
                                 image = null,
                                 language = "bahasa",
-                                state = "in_progress"
+                                state = "in_progress",
+                                order = nextOrder
                             )
                         )
                         dismiss()
