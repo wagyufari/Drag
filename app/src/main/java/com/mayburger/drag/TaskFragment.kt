@@ -72,7 +72,7 @@ class TaskFragment : Fragment() {
             adapter = taskAdapter
             layoutManager = LinearLayoutManager(requireActivity())
         }
-        database.taskDao().getTasks("bahasa", state).observe(viewLifecycleOwner) {
+        database.taskDao().getTasks(state).observe(viewLifecycleOwner) {
             tasks.clear()
             tasks.addAll(it)
             taskAdapter.setItems(tasks)

@@ -47,9 +47,7 @@ class TaskAdapter : RecyclerView.Adapter<BaseViewHolder>() {
         this.data.add(position, Task(
             id = -1,
             title = null,
-            caption = null,
             image = null,
-            language = null,
             state = null
         ))
         notifyDataSetChanged()
@@ -63,9 +61,7 @@ class TaskAdapter : RecyclerView.Adapter<BaseViewHolder>() {
         this.data.add(Task(
             id = -1,
             title = null,
-            caption = null,
             image = null,
-            language = null,
             state = null
         ))
         notifyDataSetChanged()

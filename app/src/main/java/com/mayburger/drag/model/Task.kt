@@ -13,12 +13,8 @@ data class Task(
     val id: Int,
     @ColumnInfo(name = "title")
     var title: String? = null,
-    @ColumnInfo(name = "caption")
-    var caption: String? = null,
     @ColumnInfo(name = "image")
     var image: String? = "",
-    @ColumnInfo(name = "language")
-    var language: String? = "bahasa",
     @ColumnInfo(name = "state")
     var state: String? = "in_progress",
     @ColumnInfo(name= "order")

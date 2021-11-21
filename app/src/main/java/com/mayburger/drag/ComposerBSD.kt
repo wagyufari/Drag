@@ -37,15 +37,13 @@ class ComposerBSD: BottomSheetDialogFragment() {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
                     val database = PersistenceDatabase.getDatabase(requireActivity()).taskDao()
                     CoroutineScope(IO).launch {
-                        val tasks = database.getTasksSuspended("bahasa", "in_progress")
+                        val tasks = database.getTasksSuspended("in_progress")
                         val nextOrder = if (tasks.isEmpty()){0}else{tasks.maxOf { it.order?:0 }}
                         PersistenceDatabase.getDatabase(requireActivity()).taskDao().putTasksSuspended(
                             Task(
                                 id = 0,
                                 title = binding.input.text.toString(),
-                                caption = null,
                                 image = null,
-                                language = "bahasa",
                                 state = "in_progress",
                                 order = nextOrder
                             )

@@ -17,9 +17,7 @@ object Prefs {
         draggingTask = Task(
             id = 0,
             title = null,
-            caption = null,
             image = null,
-            language = null,
             state = null
         )
     }
