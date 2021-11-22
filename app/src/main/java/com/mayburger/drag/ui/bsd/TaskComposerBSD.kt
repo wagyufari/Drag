@@ -47,7 +47,10 @@ class TaskComposerBSD: BottomSheetDialogFragment() {
                                 title = binding.input.text.toString(),
                                 image = null,
                                 state = stateId,
-                                order = nextOrder
+                                order = nextOrder,
+                                currentProgress = 50f,
+                                target_progress = 200f,
+                                type = "Company OKR"
                             )
                         )
                         dismiss()

@@ -15,8 +15,14 @@ data class Task(
     var title: String? = null,
     @ColumnInfo(name = "image")
     var image: String? = "",
+    @ColumnInfo(name = "type")
+    var type: String? = "",
+    @ColumnInfo(name = "current_progress")
+    var currentProgress: Float = 0f,
+    @ColumnInfo(name = "target_progress")
+    var target_progress: Float = 0f,
     @ColumnInfo(name = "state")
     var state: String? = "in_progress",
-    @ColumnInfo(name= "order")
-    var order:Int?=0
+    @ColumnInfo(name = "order")
+    var order: Int? = 0
 ) : Parcelable

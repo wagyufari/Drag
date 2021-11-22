@@ -3,12 +3,15 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="app/src/main/res/drawable/circle.xml" value="0.2984375" />
+        <entry key="app/src/main/res/drawable/shp_4dp.xml" value="0.2984375" />
+        <entry key="app/src/main/res/drawable/shp_8dp.xml" value="0.2984375" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.165" />
         <entry key="app/src/main/res/layout/composer_bsd.xml" value="0.35656836461126007" />
         <entry key="app/src/main/res/layout/fragment_task.xml" value="0.25" />
         <entry key="app/src/main/res/layout/item_flyer.xml" value="0.165" />
-        <entry key="app/src/main/res/layout/item_task.xml" value="0.2462962962962963" />
-        <entry key="app/src/main/res/layout/item_task_ghost.xml" value="0.11" />
+        <entry key="app/src/main/res/layout/item_task.xml" value="0.335" />
+        <entry key="app/src/main/res/layout/item_task_ghost.xml" value="0.37815126050420167" />
         <entry key="app/src/main/res/layout/page_task_fragment.xml" value="0.1" />
         <entry key="app/src/main/res/layout/state_composer_bsd.xml" value="0.12777777777777777" />
         <entry key="app/src/main/res/layout/task_composer_bsd.xml" value="0.12777777777777777" />

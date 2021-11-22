@@ -11,7 +11,7 @@ import com.mayburger.drag.model.Task
 
 @Database(
     entities = [Task::class, State::class],
-    version = 4
+    version = 6
 )
 abstract class PersistenceDatabase : RoomDatabase() {
 

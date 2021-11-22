@@ -7,6 +7,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
+import com.mayburger.drag.R
 import com.mayburger.drag.base.BaseViewHolder
 import com.mayburger.drag.data.Prefs
 import com.mayburger.drag.databinding.ItemTaskBinding
@@ -122,6 +125,11 @@ class TaskAdapter : RecyclerView.Adapter<BaseViewHolder>() {
         override fun onBind(position: Int) {
             val task = data[position]
             mBinding.title.text = task.title
+            mBinding.type.text = task.type
+            mBinding.progressMetric.text = "${task.currentProgress} / ${task.target_progress} (%)"
+            mBinding.progressPercentage.text = "${((task.currentProgress * 100) / task.target_progress).toInt()}%"
+            mBinding.progress.max = task.target_progress.toInt()
+            mBinding.progress.progress = task.currentProgress.toInt()
             mBinding.root.setOnLongClickListener {
                 val item = ClipData.Item(task.id.toString())
                 val mimeTypes = arrayOf(ClipDescription.MIMETYPE_TEXT_PLAIN)
@@ -131,6 +139,9 @@ class TaskAdapter : RecyclerView.Adapter<BaseViewHolder>() {
                 Prefs.draggingTask = task
                 true
             }
+            Glide.with(mBinding.profile).load(R.drawable.cat)
+                .apply(RequestOptions().circleCrop())
+                .into(mBinding.profile)
             mBinding.root.setOnDragListener { v, event ->
                 when(event.action){
                     DragEvent.ACTION_DRAG_ENTERED->{
